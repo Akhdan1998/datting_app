@@ -5,8 +5,9 @@ class SignIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = Get.put(SignInController());
     return Scaffold(
-      backgroundColor: lemonade,
+      backgroundColor: electric,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 28),
@@ -16,7 +17,7 @@ class SignIn extends StatelessWidget {
               const Spacer(flex: 2),
               Image.asset(
                 'assets/images/logo_datting.png',
-                color: electric,
+                color: lemonade,
                 scale: 4.5,
               ),
               const SizedBox(height: 24),
@@ -25,7 +26,7 @@ class SignIn extends StatelessWidget {
                 style: inconsolataStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: electric,
+                  color: lemonade,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -34,15 +35,17 @@ class SignIn extends StatelessWidget {
                 'No fake energy.\nJust genuine convos, effortless connections.',
                 style: inconsolataStyle(
                   fontSize: 16,
-                  color: pureBlack.withOpacity(0.75),
+                  color: lemonade.withOpacity(0.75),
                 ),
                 textAlign: TextAlign.center,
               ),
               const Spacer(flex: 3),
               BounceButton(
                 onTap: () {
-                  Get.to(Navigation());
+                  c.loginGoogle();
                 },
+                color: lemonade,
+                padding: const EdgeInsets.only(top: 15, bottom: 15),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -51,17 +54,48 @@ class SignIn extends StatelessWidget {
                       height: 22,
                     ),
                     const SizedBox(width: 12),
-                    Text('Continue with Google',
-                        style: inconsolataStyle(fontSize: 15, fontWeight: FontWeight.bold,),),
+                    Text(
+                      'Continue with Google',
+                      style: inconsolataStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: electric,
+                      ),
+                    ),
                   ],
                 ),
               ),
+              SizedBox(height: Platform.isIOS ? 20 : 0),
+              Platform.isIOS ? BounceButton(
+                onTap: () {
+                  c.loginApple();
+                },
+                color: lemonade,
+                padding: const EdgeInsets.only(top: 15, bottom: 15),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/icons/apple.png',
+                      height: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Continue with Apple',
+                      style: inconsolataStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: electric),
+                    ),
+                  ],
+                ),
+              ) : const SizedBox.shrink(),
               const SizedBox(height: 20),
               Text(
                 'By continuing, you agree to our Terms & Privacy Policy',
                 style: inconsolataStyle(
                   fontSize: 12,
-                  color: pureBlack.withOpacity(0.5),
+                  color: lemonade.withOpacity(0.5),
                 ),
                 textAlign: TextAlign.center,
               ),

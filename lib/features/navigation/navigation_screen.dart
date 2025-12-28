@@ -42,7 +42,7 @@ class _NavigationState extends State<Navigation> {
 
             return Container(
               color: whiteSkin,
-              padding: EdgeInsets.only(top: 0, bottom: bottomInset),
+              padding: EdgeInsets.only(top: 10, bottom: bottomInset),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(_items.length, (i) {
@@ -88,7 +88,8 @@ class _BottomNavButton extends StatelessWidget {
         curve: Curves.easeOutCubic,
         width: 92,
         height: 92,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18),
           color: isActive ? lemonade.withOpacity(0.10) : transparentColor,

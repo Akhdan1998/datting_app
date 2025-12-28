@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "915975936252",
+    "project_id": "datting-app-7c215",
+    "storage_bucket": "datting-app-7c215.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:915975936252:android:3b7a08ba792fb4a358df79",
+        "android_client_info": {
+          "package_name": "com.akhdan.datting_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "915975936252-abocpb64r39suscd69dauohonrhiau5r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.akhdan.datting_app",
+            "certificate_hash": "1cb81de8d944a55882bb0e246fd21eed5e7550f7"
+          }
+        },
+        {
+          "client_id": "915975936252-abag9mc2sp6qr0dq2dtjb6rg6dadbm23.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXb_ixNPgaoL3e5aLk8RxZdopsSucPd0w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "915975936252-abag9mc2sp6qr0dq2dtjb6rg6dadbm23.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "915975936252-ca3riq3qqflgjqujb8ogpreo4vakdpqt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.akhdan.dattingApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

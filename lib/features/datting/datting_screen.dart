@@ -26,7 +26,7 @@ class _DattingState extends State<Datting> {
       body: SafeArea(
         bottom: true,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -362,15 +362,17 @@ class _ProfileCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(26),
+    return Container(
+      decoration: BoxDecoration(
+        color: whiteBlue,
+        borderRadius: BorderRadius.circular(26),
+      ),
       child: Stack(
         fit: StackFit.expand,
         children: [
           Image.asset(item.image, fit: BoxFit.cover),
           Container(
             decoration: BoxDecoration(
-              color: whiteBlue,
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -390,7 +392,7 @@ class _ProfileCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    '${item.name}, ${item.age}',
+                    '${item.name}\n${item.age} Tahun',
                     style: inconsolataStyle(
                       fontSize: 22,
                       color: lemonade,

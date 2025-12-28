@@ -1,45 +1,33 @@
 part of '../../pages.dart';
 
-class Splash extends StatefulWidget {
+class Splash extends StatelessWidget {
   const Splash({super.key});
 
   @override
-  State<Splash> createState() => _SplashState();
-}
-
-class _SplashState extends State<Splash> {
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    Future.delayed(const Duration(seconds: 3)).whenComplete(() {
-      Get.offAll(SignIn());
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    // controller dibuat sekali saat page dibuka
+    Get.put(SplashController());
+
     return Scaffold(
-      backgroundColor: lemonade,
+      backgroundColor: electric,
       body: Stack(
         children: [
           Center(
             child: Image.asset(
               'assets/images/logo_datting.png',
-              color: electric,
+              color: lemonade,
               scale: 5,
             ),
           ),
-
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 40),
               child: Text(
                 'SABRUT APP',
-                style: TextStyle(
+                style: inconsolataStyle(
                   fontSize: 20,
-                  color: electric,
+                  color: lemonade,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
