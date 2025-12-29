@@ -9,10 +9,11 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   final controller = Get.put(NavigationController());
-  static const List<Widget> _pages = [
-    Datting(),
-    Chat(),
-    Me(),
+
+  static final List<Widget> _pages = [
+    const Datting(),
+    const ChatHome(),
+    const Me(),
   ];
 
   static const List<_NavItem> _items = [
@@ -36,7 +37,6 @@ class _NavigationState extends State<Navigation> {
               children: _pages,
             ),
           ),
-
           Obx(() {
             final activeIndex = controller.currentIndex.value;
 
@@ -47,7 +47,6 @@ class _NavigationState extends State<Navigation> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(_items.length, (i) {
                   final item = _items[i];
-
                   return _BottomNavButton(
                     iconPath: item.iconPath,
                     label: item.label,

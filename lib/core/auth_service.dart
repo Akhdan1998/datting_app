@@ -2,46 +2,76 @@ part of '../../pages.dart';
 
 class AuthService {
   AuthService._();
+
   static final instance = AuthService._();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  User? get currentUser => _auth.currentUser;
+
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: const ['email', 'profile'],
   );
-
-  User? get currentUser => _auth.currentUser;
 
   Future<void> init() async {
     debugPrint('[AuthService] init called');
   }
 
+  String? _detectProviderId(User? user) {
+    final providers = user?.providerData ?? const <UserInfo>[];
+    if (providers.isEmpty) return null;
+    return providers.first.providerId;
+  }
+
+  Future<void> _upsertCurrentUser(User user) async {
+    final providerId = _detectProviderId(user);
+    final provider = providerId == 'google.com'
+        ? 'google'
+        : providerId == 'apple.com'
+            ? 'apple'
+            : providerId;
+
+    final payload = DatingUser(
+      uid: user.uid,
+      name: user.displayName,
+      email: user.email,
+      photoUrl: user.photoURL,
+      provider: provider,
+      isProfileComplete: false,
+    );
+
+    await UserRepo.instance.upsertUser(payload);
+
+    debugPrint('[AuthService] upsert user to Firestore done: uid=${user.uid}');
+  }
+
   Future<UserCredential> signInWithGoogle() async {
     debugPrint('[AuthService] signInWithGoogle start');
-
     try {
       final googleUser = await _googleSignIn.signIn();
-
       if (googleUser == null) {
         debugPrint('[AuthService] signInWithGoogle cancelled by user');
         throw Exception('Sign-in cancelled');
       }
 
-      debugPrint('[AuthService] Google user selected: email=${googleUser.email}');
+      debugPrint(
+          '[AuthService] Google user selected: email=${googleUser.email}');
 
       final googleAuth = await googleUser.authentication;
 
-      final hasIdToken = (googleAuth.idToken != null && googleAuth.idToken!.isNotEmpty);
-      final hasAccessToken = (googleAuth.accessToken != null && googleAuth.accessToken!.isNotEmpty);
+      final hasIdToken =
+          (googleAuth.idToken != null && googleAuth.idToken!.isNotEmpty);
+      final hasAccessToken = (googleAuth.accessToken != null &&
+          googleAuth.accessToken!.isNotEmpty);
 
       debugPrint(
-        '[AuthService] Google auth tokens present: idToken=$hasIdToken, accessToken=$hasAccessToken',
+        '[AuthService] Google tokens: idToken=$hasIdToken accessToken=$hasAccessToken',
       );
 
       if (!hasIdToken && !hasAccessToken) {
-        throw Exception('Google auth token is missing (idToken/accessToken null)');
+        throw Exception('Google auth token missing (idToken/accessToken null)');
       }
 
       final credential = GoogleAuthProvider.credential(
@@ -51,13 +81,16 @@ class AuthService {
 
       final userCred = await _auth.signInWithCredential(credential);
 
-      debugPrint(
-        '[AuthService] Firebase signInWithCredential success: uid=${userCred.user?.uid}',
-      );
+      final user = userCred.user;
+      if (user != null) {
+        await _upsertCurrentUser(user);
+      }
 
+      debugPrint('[AuthService] signInWithGoogle success: uid=${user?.uid}');
       return userCred;
     } on FirebaseAuthException catch (e, st) {
-      debugPrint('[AuthService] FirebaseAuthException (Google): code=${e.code}, message=${e.message}');
+      debugPrint(
+          '[AuthService] FirebaseAuthException(Google): code=${e.code}, msg=${e.message}');
       debugPrint('[AuthService] STACKTRACE:\n$st');
       rethrow;
     } catch (e, st) {
@@ -75,77 +108,50 @@ class AuthService {
     final rawNonce = _generateNonce();
     final nonce = _sha256ofString(rawNonce);
 
-    try {
-      debugPrint('[AuthService] platform=$defaultTargetPlatform isWeb=$kIsWeb');
+    debugPrint('[AuthService] rawNonceLen=${rawNonce.length} nonceLen=${nonce.length}');
 
-      debugPrint('[AuthService] Requesting AppleID credential (nonce generated)');
+    final appleIdCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: const [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+      nonce: nonce,
+    );
 
-      final appleIdCredential = await SignInWithApple.getAppleIDCredential(
-        scopes: const [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-        nonce: nonce,
-      );
-
-      final idToken = appleIdCredential.identityToken;
-      final hasIdToken = idToken != null && idToken.isNotEmpty;
-
-      debugPrint(
-        '[AuthService] Apple credential received: '
-            'hasIdentityToken=$hasIdToken, '
-            'email=${appleIdCredential.email}, '
-            'givenName=${appleIdCredential.givenName}, '
-            'familyName=${appleIdCredential.familyName}',
-      );
-
-      if (!hasIdToken) {
-        throw Exception('Apple identityToken is missing (check capability/signing)');
-      }
-
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: idToken,
-        rawNonce: rawNonce,
-      );
-
-      final userCred = await _auth.signInWithCredential(oauthCredential);
-
-      debugPrint(
-        '[AuthService] Firebase signInWithCredential (Apple) success: uid=${userCred.user?.uid}',
-      );
-
-      return userCred;
-    } on SignInWithAppleAuthorizationException catch (e, st) {
-      debugPrint('[AuthService] Apple Auth Exception: code=${e.code}, message=${e.message}');
-      debugPrint('[AuthService] STACKTRACE:\n$st');
-
-      // Mapping pesan biar jelas
-      if (e.code == AuthorizationErrorCode.canceled) {
-        throw Exception('Login Apple dibatalkan');
-      }
-
-      // Unknown 1000: umumnya konfigurasi / simulator
-      throw Exception(
-        'Login Apple gagal (iOS error ${e.code}). '
-            'Coba jalankan di real device dan pastikan capability "Sign In with Apple" aktif di Xcode.',
-      );
-    } on FirebaseAuthException catch (e, st) {
-      debugPrint('[AuthService] FirebaseAuthException (Apple): code=${e.code}, message=${e.message}');
-      debugPrint('[AuthService] STACKTRACE:\n$st');
-      rethrow;
-    } catch (e, st) {
-      debugPrint('[AuthService] signInWithApple ERROR: $e');
-      debugPrint('[AuthService] STACKTRACE:\n$st');
-      rethrow;
-    } finally {
-      debugPrint('[AuthService] signInWithApple end');
+    final idToken = appleIdCredential.identityToken;
+    if (idToken == null || idToken.isEmpty) {
+      throw Exception('Apple identityToken missing');
     }
+
+    final oauthCredential = OAuthProvider('apple.com').credential(
+      idToken: idToken,
+      rawNonce: rawNonce,
+    );
+
+    return _auth.signInWithCredential(oauthCredential);
+  }
+
+  String _generateNonce([int length = 32]) {
+    const charset =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => charset[random.nextInt(charset.length)])
+        .join();
+  }
+
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
   }
 
   Future<void> signOut() async {
     debugPrint('[AuthService] signOut start');
     try {
-      await _googleSignIn.signOut();
+      try {
+        await _googleSignIn.signOut();
+      } catch (_) {}
+
       await _auth.signOut();
       debugPrint('[AuthService] signOut success');
     } catch (e, st) {
@@ -154,17 +160,29 @@ class AuthService {
       rethrow;
     }
   }
+}
 
-  // ===== helpers for Apple nonce =====
-  String _generateNonce([int length = 32]) {
-    const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
-    final random = Random.secure();
-    return List.generate(length, (_) => charset[random.nextInt(charset.length)]).join();
+class UserRepo {
+  UserRepo._();
+
+  static final instance = UserRepo._();
+
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  Future<void> upsertUser(DatingUser user) async {
+    await _db
+        .collection('users')
+        .doc(user.uid)
+        .set(user.toMap(), SetOptions(merge: true));
   }
 
-  String _sha256ofString(String input) {
-    final bytes = utf8.encode(input);
-    final digest = sha256.convert(bytes);
-    return digest.toString();
+  Stream<List<DatingUser>> streamDiscoverUsers({required String myUid}) {
+    return FirebaseFirestore.instance
+        .collection('publicProfiles')
+        .where(FieldPath.documentId, isNotEqualTo: myUid)
+        .orderBy(FieldPath.documentId)
+        .limit(50)
+        .snapshots()
+        .map((snap) => snap.docs.map((d) => DatingUser.fromDoc(d)).toList());
   }
 }

@@ -1,11 +1,11 @@
 part of '../../pages.dart';
 
-class DattingController extends GetxController {
-  final users = <DatingUser>[].obs;
+class ChatListController extends GetxController {
+  final rooms = <ChatRoom>[].obs;
   final isLoading = true.obs;
   final error = ''.obs;
 
-  StreamSubscription<List<DatingUser>>? _sub;
+  StreamSubscription<List<ChatRoom>>? _sub;
 
   @override
   void onInit() {
@@ -18,11 +18,12 @@ class DattingController extends GetxController {
       return;
     }
 
-    _sub = UserRepo.instance.streamDiscoverUsers(myUid: me.uid).listen((list) {
-      users.value = list;
+    _sub = ChatRepo.instance.streamMyRooms(me.uid).listen((list) {
+      rooms.value = list;
       isLoading.value = false;
       error.value = '';
-    }, onError: (e) {
+    }, onError: (e, st) {
+      debugPrint('[ChatListController] error: $e\n$st');
       error.value = e.toString();
       isLoading.value = false;
     });
@@ -33,10 +34,4 @@ class DattingController extends GetxController {
     _sub?.cancel();
     super.onClose();
   }
-
-  void onSwipeLeft(DatingUser u) => debugPrint('NOPE: ${u.uid}');
-
-  void onSwipeRight(DatingUser u) => debugPrint('LIKE: ${u.uid}');
-
-  void onSwipeUp(DatingUser u) => debugPrint('SUPER: ${u.uid}');
 }

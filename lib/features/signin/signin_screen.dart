@@ -5,7 +5,7 @@ class SignIn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(SignInController());
+    final controller = Get.put(SignInController());
     return Scaffold(
       backgroundColor: electric,
       body: SafeArea(
@@ -40,56 +40,62 @@ class SignIn extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const Spacer(flex: 3),
-              BounceButton(
-                onTap: () {
-                  c.loginGoogle();
-                },
-                color: lemonade,
-                padding: const EdgeInsets.only(top: 15, bottom: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/icons/google.png',
-                      height: 22,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Continue with Google',
-                      style: inconsolataStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: electric,
+              controller.isLoadingGoogle.value
+                  ? CircularProgressIndicator(color: lemonade)
+                  : BounceButton(
+                      onTap: controller.isLoadingGoogle.value
+                          ? () {}
+                          : controller.loginGoogle,
+                      color: lemonade,
+                      padding: const EdgeInsets.only(top: 15, bottom: 15),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/icons/google.png',
+                            height: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Continue with Google',
+                            style: inconsolataStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: electric,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
               SizedBox(height: Platform.isIOS ? 20 : 0),
-              Platform.isIOS ? BounceButton(
-                onTap: () {
-                  c.loginApple();
-                },
-                color: lemonade,
-                padding: const EdgeInsets.only(top: 15, bottom: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.asset(
-                      'assets/icons/apple.png',
-                      height: 22,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Continue with Apple',
-                      style: inconsolataStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                          color: electric),
-                    ),
-                  ],
-                ),
-              ) : const SizedBox.shrink(),
+              Platform.isIOS
+                  ? controller.isLoadingApple.value
+                      ? CircularProgressIndicator(color: lemonade)
+                      : BounceButton(
+                          onTap: controller.isLoadingApple.value
+                              ? () {}
+                              : controller.loginApple,
+                          color: lemonade,
+                          padding: const EdgeInsets.only(top: 15, bottom: 15),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/icons/apple.png',
+                                height: 22,
+                              ),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Continue with Apple',
+                                style: inconsolataStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.bold,
+                                    color: electric),
+                              ),
+                            ],
+                          ),
+                        )
+                  : const SizedBox.shrink(),
               const SizedBox(height: 20),
               Text(
                 'By continuing, you agree to our Terms & Privacy Policy',

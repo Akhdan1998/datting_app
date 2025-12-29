@@ -5,7 +5,7 @@ class Me extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(MeController());
+    final controller = Get.put(MeController());
 
     return Scaffold(
       backgroundColor: electric,
@@ -25,16 +25,17 @@ class Me extends StatelessWidget {
                           color: lemonade,
                           fontWeight: FontWeight.w700)),
                   BounceButton(
-                    onTap: c.openSettings,
+                    onTap: controller.openSettings,
                     child: Icon(Icons.settings_rounded,
                         color: lemonade.withOpacity(0.9)),
                   ),
                 ],
               ),
               const SizedBox(height: 15),
-              _MeProfileCard(controller: c),
+              _MeProfileCard(controller: controller),
               const SizedBox(height: 15),
-              _QuickActionsRow(controller: c),
+              _QuickActionsRow(controller: controller),
+              const SizedBox(height: 15),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -46,39 +47,39 @@ class Me extends StatelessWidget {
                           Obx(() => _MeTile(
                             icon: Icons.location_on_rounded,
                             title: 'Location',
-                            subtitle: c.city.value,
-                            onTap: c.openLocation,
+                            subtitle: controller.city.value,
+                            onTap: controller.openLocation,
                           )),
                           Obx(() => _MeTile(
                             icon: Icons.radar_rounded,
                             title: 'Distance',
-                            subtitle: '${c.distanceKm.value} km',
-                            onTap: c.openDistance,
+                            subtitle: '${controller.distanceKm.value} km',
+                            onTap: controller.openDistance,
                           )),
                           Obx(() => _MeTile(
                             icon: Icons.cake_rounded,
                             title: 'Age range',
-                            subtitle: '${c.ageMin.value}–${c.ageMax.value}',
-                            onTap: c.openAgeRange,
+                            subtitle: '${controller.ageMin.value}–${controller.ageMax.value}',
+                            onTap: controller.openAgeRange,
                           )),
                           Obx(() => _MeTile(
                             icon: Icons.favorite_rounded,
                             title: 'Show me',
-                            subtitle: c.preference.value,
-                            onTap: c.openPreference,
+                            subtitle: controller.preference.value,
+                            onTap: controller.openPreference,
                           )),
                           Obx(() => _MeToggleTile(
                             icon: Icons.visibility_rounded,
                             title: 'Show me on discovery',
-                            value: c.showOnDiscovery.value,
-                            onChanged: (v) => c.showOnDiscovery.value = v,
+                            value: controller.showOnDiscovery.value,
+                            onChanged: (v) => controller.showOnDiscovery.value = v,
                           )),
                           _MeTile(
                             icon: Icons.tune_rounded,
                             title: 'Advanced filters',
                             subtitle: 'Premium',
-                            onTap: c.openFilters,
-                            trailing: _Pill(text: 'PRO'),
+                            onTap: controller.openFilters,
+                            trailing: const _Pill(text: 'PRO'),
                           ),
                         ],
                       ),
@@ -90,33 +91,33 @@ class Me extends StatelessWidget {
                             icon: Icons.verified_rounded,
                             title: 'Photo verification',
                             subtitle:
-                            c.verified.value ? 'Verified' : 'Not verified',
-                            onTap: c.openVerification,
-                            trailing: c.verified.value ? _Pill(text: 'OK') : null,
+                            controller.verified.value ? 'Verified' : 'Not verified',
+                            onTap: controller.openVerification,
+                            trailing: controller.verified.value ? _Pill(text: 'OK') : null,
                           )),
                           _MeTile(
                             icon: Icons.block_rounded,
                             title: 'Blocked users',
                             subtitle: 'Manage',
-                            onTap: c.openBlockList,
+                            onTap: controller.openBlockList,
                           ),
                           Obx(() => _MeToggleTile(
                             icon: Icons.pin_drop_rounded,
                             title: 'Show distance',
-                            value: c.showDistance.value,
-                            onChanged: (v) => c.showDistance.value = v,
+                            value: controller.showDistance.value,
+                            onChanged: (v) => controller.showDistance.value = v,
                           )),
                           Obx(() => _MeToggleTile(
                             icon: Icons.circle_rounded,
                             title: 'Show online status',
-                            value: c.showOnlineStatus.value,
-                            onChanged: (v) => c.showOnlineStatus.value = v,
+                            value: controller.showOnlineStatus.value,
+                            onChanged: (v) => controller.showOnlineStatus.value = v,
                           )),
                           Obx(() => _MeToggleTile(
                             icon: Icons.mark_chat_read_rounded,
                             title: 'Read receipts',
-                            value: c.readReceipts.value,
-                            onChanged: (v) => c.readReceipts.value = v,
+                            value: controller.readReceipts.value,
+                            onChanged: (v) => controller.readReceipts.value = v,
                             subtitle: 'Premium',
                           )),
                         ],
@@ -129,26 +130,26 @@ class Me extends StatelessWidget {
                             icon: Icons.notifications_rounded,
                             title: 'Notifications',
                             subtitle: 'Matches, chats, likes',
-                            onTap: c.openNotifications,
+                            onTap: controller.openNotifications,
                           ),
                           _MeTile(
                             icon: Icons.workspace_premium_rounded,
                             title: 'Subscription',
                             subtitle: 'Manage plan',
-                            onTap: c.openSubscription,
-                            trailing: _Pill(text: 'PRO'),
+                            onTap: controller.openSubscription,
+                            trailing: const _Pill(text: 'PRO'),
                           ),
                           _MeTile(
                             icon: Icons.link_rounded,
                             title: 'Connected accounts',
                             subtitle: 'Google / Apple',
-                            onTap: c.openConnectedAccounts,
+                            onTap: controller.openConnectedAccounts,
                           ),
                           _MeTile(
                             icon: Icons.logout_rounded,
                             title: 'Logout',
                             subtitle: '',
-                            onTap: c.logout,
+                            onTap: controller.logout,
                           ),
                         ],
                       ),
@@ -187,9 +188,8 @@ class Me extends StatelessWidget {
                       _MeDangerTile(
                         title: 'Delete account',
                         subtitle: 'This can’t be undone',
-                        onTap: c.deleteAccount,
+                        onTap: controller.deleteAccount,
                       ),
-                      // const SizedBox(height: 24),
                     ],
                   ),
                 ),
@@ -489,7 +489,6 @@ class _MeSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(top: 15),
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
