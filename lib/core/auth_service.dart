@@ -25,7 +25,7 @@ class AuthService {
     return providers.first.providerId;
   }
 
-  Future<void> _upsertCurrentUser(User user) async {
+  Future<bool> _upsertCurrentUser(User user) async {
     final providerId = _detectProviderId(user);
     final provider = providerId == 'google.com'
         ? 'google'
@@ -42,37 +42,20 @@ class AuthService {
       isProfileComplete: false,
     );
 
-    await UserRepo.instance.upsertUser(payload);
+    final isNewUser = await UserRepo.instance.ensureUserInitialized(payload);
 
-    debugPrint('[AuthService] upsert user to Firestore done: uid=${user.uid}');
+    debugPrint(
+        '[AuthService] ensureUserInitialized done: uid=${user.uid} isNew=$isNewUser');
+    return isNewUser;
   }
 
-  Future<UserCredential> signInWithGoogle() async {
+  Future<(UserCredential cred, bool isNewUser)> signInWithGoogle() async {
     debugPrint('[AuthService] signInWithGoogle start');
     try {
       final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) {
-        debugPrint('[AuthService] signInWithGoogle cancelled by user');
-        throw Exception('Sign-in cancelled');
-      }
-
-      debugPrint(
-          '[AuthService] Google user selected: email=${googleUser.email}');
+      if (googleUser == null) throw Exception('Sign-in cancelled');
 
       final googleAuth = await googleUser.authentication;
-
-      final hasIdToken =
-          (googleAuth.idToken != null && googleAuth.idToken!.isNotEmpty);
-      final hasAccessToken = (googleAuth.accessToken != null &&
-          googleAuth.accessToken!.isNotEmpty);
-
-      debugPrint(
-        '[AuthService] Google tokens: idToken=$hasIdToken accessToken=$hasAccessToken',
-      );
-
-      if (!hasIdToken && !hasAccessToken) {
-        throw Exception('Google auth token missing (idToken/accessToken null)');
-      }
 
       final credential = GoogleAuthProvider.credential(
         idToken: googleAuth.idToken,
@@ -82,21 +65,13 @@ class AuthService {
       final userCred = await _auth.signInWithCredential(credential);
 
       final user = userCred.user;
+      bool isNewUser = false;
       if (user != null) {
-        await _upsertCurrentUser(user);
+        isNewUser = await _upsertCurrentUser(user);
       }
 
       debugPrint('[AuthService] signInWithGoogle success: uid=${user?.uid}');
-      return userCred;
-    } on FirebaseAuthException catch (e, st) {
-      debugPrint(
-          '[AuthService] FirebaseAuthException(Google): code=${e.code}, msg=${e.message}');
-      debugPrint('[AuthService] STACKTRACE:\n$st');
-      rethrow;
-    } catch (e, st) {
-      debugPrint('[AuthService] signInWithGoogle ERROR: $e');
-      debugPrint('[AuthService] STACKTRACE:\n$st');
-      rethrow;
+      return (userCred, isNewUser);
     } finally {
       debugPrint('[AuthService] signInWithGoogle end');
     }
@@ -108,7 +83,8 @@ class AuthService {
     final rawNonce = _generateNonce();
     final nonce = _sha256ofString(rawNonce);
 
-    debugPrint('[AuthService] rawNonceLen=${rawNonce.length} nonceLen=${nonce.length}');
+    debugPrint(
+        '[AuthService] rawNonceLen=${rawNonce.length} nonceLen=${nonce.length}');
 
     final appleIdCredential = await SignInWithApple.getAppleIDCredential(
       scopes: const [
@@ -159,30 +135,5 @@ class AuthService {
       debugPrint('[AuthService] STACKTRACE:\n$st');
       rethrow;
     }
-  }
-}
-
-class UserRepo {
-  UserRepo._();
-
-  static final instance = UserRepo._();
-
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
-
-  Future<void> upsertUser(DatingUser user) async {
-    await _db
-        .collection('users')
-        .doc(user.uid)
-        .set(user.toMap(), SetOptions(merge: true));
-  }
-
-  Stream<List<DatingUser>> streamDiscoverUsers({required String myUid}) {
-    return FirebaseFirestore.instance
-        .collection('publicProfiles')
-        .where(FieldPath.documentId, isNotEqualTo: myUid)
-        .orderBy(FieldPath.documentId)
-        .limit(50)
-        .snapshots()
-        .map((snap) => snap.docs.map((d) => DatingUser.fromDoc(d)).toList());
   }
 }

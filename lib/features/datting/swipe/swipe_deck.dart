@@ -2,6 +2,7 @@ part of '../../../pages.dart';
 
 class SwipeDeckScope extends InheritedWidget {
   final SwipeDeckState state;
+
   const SwipeDeckScope({super.key, required this.state, required super.child});
 
   @override
@@ -53,16 +54,15 @@ class SwipeDeckState<T> extends State<SwipeDeck<T>>
       vsync: this,
       duration: const Duration(milliseconds: 220),
     )..addListener(() {
-      if (!mounted) return;
-      if (_offsetAnim != null) setState(() => _drag = _offsetAnim!.value);
-    });
+        if (!mounted) return;
+        if (_offsetAnim != null) setState(() => _drag = _offsetAnim!.value);
+      });
   }
 
   @override
   void didUpdateWidget(covariant SwipeDeck<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // kalau list berubah dari stream, amankan index
     final len = widget.items.length;
     if (len == 0) {
       _anim.stop();
@@ -125,7 +125,6 @@ class SwipeDeckState<T> extends State<SwipeDeck<T>>
   void _dismiss(SwipeDirection dir) {
     if (!_hasCards) return;
 
-    // ambil item sekarang biar aman kalau list berubah
     final T currentItem = widget.items[_topIndex];
 
     final size = MediaQuery.of(context).size;
@@ -162,15 +161,14 @@ class SwipeDeckState<T> extends State<SwipeDeck<T>>
     });
   }
 
-  // dipanggil oleh controller
   void programmaticSwipe(SwipeDirection dir) {
     if (!_hasCards) return;
 
     _drag = dir == SwipeDirection.left
         ? const Offset(-20, 0)
         : dir == SwipeDirection.right
-        ? const Offset(20, 0)
-        : const Offset(0, -20);
+            ? const Offset(20, 0)
+            : const Offset(0, -20);
 
     _dismiss(dir);
   }
@@ -188,7 +186,7 @@ class SwipeDeckState<T> extends State<SwipeDeck<T>>
 
           final remaining = widget.items.length - _topIndex;
           final count =
-          remaining < widget.visibleCount ? remaining : widget.visibleCount;
+              remaining < widget.visibleCount ? remaining : widget.visibleCount;
 
           return Stack(
             alignment: Alignment.center,

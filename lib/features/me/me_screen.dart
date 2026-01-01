@@ -5,198 +5,194 @@ class Me extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(MeController());
+    final controller = Get.isRegistered<MeController>()
+        ? Get.find<MeController>()
+        : Get.put(MeController());
 
     return Scaffold(
       backgroundColor: electric,
       body: SafeArea(
         bottom: false,
-        child: Container(
-          padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Me',
-                      style: inconsolataStyle(
-                          fontSize: 22,
-                          color: lemonade,
-                          fontWeight: FontWeight.w700)),
-                  BounceButton(
-                    onTap: controller.openSettings,
-                    child: Icon(Icons.settings_rounded,
-                        color: lemonade.withOpacity(0.9)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 15),
-              _MeProfileCard(controller: controller),
-              const SizedBox(height: 15),
-              _QuickActionsRow(controller: controller),
-              const SizedBox(height: 15),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _MeSection(
-                        title: 'Discovery',
-                        children: [
-                          Obx(() => _MeTile(
-                            icon: Icons.location_on_rounded,
-                            title: 'Location',
-                            subtitle: controller.city.value,
-                            onTap: controller.openLocation,
-                          )),
-                          Obx(() => _MeTile(
-                            icon: Icons.radar_rounded,
-                            title: 'Distance',
-                            subtitle: '${controller.distanceKm.value} km',
-                            onTap: controller.openDistance,
-                          )),
-                          Obx(() => _MeTile(
-                            icon: Icons.cake_rounded,
-                            title: 'Age range',
-                            subtitle: '${controller.ageMin.value}–${controller.ageMax.value}',
-                            onTap: controller.openAgeRange,
-                          )),
-                          Obx(() => _MeTile(
-                            icon: Icons.favorite_rounded,
-                            title: 'Show me',
-                            subtitle: controller.preference.value,
-                            onTap: controller.openPreference,
-                          )),
-                          Obx(() => _MeToggleTile(
-                            icon: Icons.visibility_rounded,
-                            title: 'Show me on discovery',
-                            value: controller.showOnDiscovery.value,
-                            onChanged: (v) => controller.showOnDiscovery.value = v,
-                          )),
-                          _MeTile(
-                            icon: Icons.tune_rounded,
-                            title: 'Advanced filters',
-                            subtitle: 'Premium',
-                            onTap: controller.openFilters,
-                            trailing: const _Pill(text: 'PRO'),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _MeSection(
-                        title: 'Safety & Privacy',
-                        children: [
-                          Obx(() => _MeTile(
-                            icon: Icons.verified_rounded,
-                            title: 'Photo verification',
-                            subtitle:
-                            controller.verified.value ? 'Verified' : 'Not verified',
-                            onTap: controller.openVerification,
-                            trailing: controller.verified.value ? _Pill(text: 'OK') : null,
-                          )),
-                          _MeTile(
-                            icon: Icons.block_rounded,
-                            title: 'Blocked users',
-                            subtitle: 'Manage',
-                            onTap: controller.openBlockList,
-                          ),
-                          Obx(() => _MeToggleTile(
-                            icon: Icons.pin_drop_rounded,
-                            title: 'Show distance',
-                            value: controller.showDistance.value,
-                            onChanged: (v) => controller.showDistance.value = v,
-                          )),
-                          Obx(() => _MeToggleTile(
-                            icon: Icons.circle_rounded,
-                            title: 'Show online status',
-                            value: controller.showOnlineStatus.value,
-                            onChanged: (v) => controller.showOnlineStatus.value = v,
-                          )),
-                          Obx(() => _MeToggleTile(
-                            icon: Icons.mark_chat_read_rounded,
-                            title: 'Read receipts',
-                            value: controller.readReceipts.value,
-                            onChanged: (v) => controller.readReceipts.value = v,
-                            subtitle: 'Premium',
-                          )),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _MeSection(
-                        title: 'Account',
-                        children: [
-                          _MeTile(
-                            icon: Icons.notifications_rounded,
-                            title: 'Notifications',
-                            subtitle: 'Matches, chats, likes',
-                            onTap: controller.openNotifications,
-                          ),
-                          _MeTile(
-                            icon: Icons.workspace_premium_rounded,
-                            title: 'Subscription',
-                            subtitle: 'Manage plan',
-                            onTap: controller.openSubscription,
-                            trailing: const _Pill(text: 'PRO'),
-                          ),
-                          _MeTile(
-                            icon: Icons.link_rounded,
-                            title: 'Connected accounts',
-                            subtitle: 'Google / Apple',
-                            onTap: controller.openConnectedAccounts,
-                          ),
-                          _MeTile(
-                            icon: Icons.logout_rounded,
-                            title: 'Logout',
-                            subtitle: '',
-                            onTap: controller.logout,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _MeSection(
-                        title: 'Support & Legal',
-                        children: [
-                          _MeTile(
-                            icon: Icons.help_rounded,
-                            title: 'Help & FAQ',
-                            subtitle: '',
-                            onTap: () => debugPrint('[Me] Help'),
-                          ),
-                          _MeTile(
-                            icon: Icons.privacy_tip_rounded,
-                            title: 'Privacy Policy',
-                            subtitle: '',
-                            onTap: () => debugPrint('[Me] Privacy Policy'),
-                          ),
-                          _MeTile(
-                            icon: Icons.description_rounded,
-                            title: 'Terms of Service',
-                            subtitle: '',
-                            onTap: () => debugPrint('[Me] Terms'),
-                          ),
-                          _MeTile(
-                            icon: Icons.info_rounded,
-                            title: 'App version',
-                            subtitle: '1.0.0',
-                            onTap: () {},
-                            trailing: const SizedBox.shrink(),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      _MeDangerTile(
-                        title: 'Delete account',
-                        subtitle: 'This can’t be undone',
-                        onTap: controller.deleteAccount,
-                      ),
-                    ],
+        child: Obx(() {
+          if (controller.isLoading.value) {
+            return Center(child: CircularProgressIndicator(color: lemonade));
+          }
+
+          return Container(
+            padding: const EdgeInsets.only(left: 15, top: 15, right: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Me',
+                        style: inconsolataStyle(
+                            fontSize: 22,
+                            color: lemonade,
+                            fontWeight: FontWeight.w700)),
+                    BounceButton(
+                      onTap: controller.openSettings,
+                      child: Icon(Icons.settings_rounded,
+                          color: lemonade.withOpacity(0.9)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 15),
+                _MeProfileCard(controller: controller),
+                const SizedBox(height: 15),
+                _QuickActionsRow(controller: controller),
+                const SizedBox(height: 15),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _MeSection(
+                          title: 'Discovery',
+                          children: [
+                            Obx(() => _MeTile(
+                                  icon: Icons.location_on_rounded,
+                                  title: 'Location',
+                                  subtitle: controller.city.value,
+                                  onTap: controller.openLocation,
+                                )),
+                            Obx(() => _MeTile(
+                                  icon: Icons.radar_rounded,
+                                  title: 'Distance',
+                                  subtitle: '${controller.distanceKm.value} km',
+                                  onTap: controller.openDistance,
+                                )),
+                            Obx(() => _MeTile(
+                                  icon: Icons.cake_rounded,
+                                  title: 'Age range',
+                                  subtitle:
+                                      '${controller.ageMin.value}–${controller.ageMax.value}',
+                                  onTap: controller.openAgeRange,
+                                )),
+                            Obx(() => _MeTile(
+                                  icon: Icons.favorite_rounded,
+                                  title: 'Show me',
+                                  subtitle: controller.preference.value,
+                                  onTap: controller.openPreference,
+                                )),
+                            Obx(() => _MeToggleTile(
+                                  icon: Icons.visibility_rounded,
+                                  title: 'Show me on discovery',
+                                  value: controller.showOnDiscovery.value,
+                                  onChanged: controller.setShowOnDiscovery,
+                                )),
+                            _MeTile(
+                              icon: Icons.tune_rounded,
+                              title: 'Advanced filters',
+                              subtitle: 'Premium',
+                              onTap: controller.openFilters,
+                              trailing: Pill(
+                                text: 'PRO',
+                                color: electric,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+
+                        // Safety & Privacy
+                        _MeSection(
+                          title: 'Safety & Privacy',
+                          children: [
+                            Obx(() => _MeTile(
+                                  icon: Icons.verified_rounded,
+                                  title: 'Photo verification',
+                                  subtitle: controller.verified.value
+                                      ? 'Verified'
+                                      : 'Not verified',
+                                  onTap: controller.openVerification,
+                                  trailing: controller.verified.value
+                                      ? Pill(
+                                          text: 'OK',
+                                          color: electric,
+                                        )
+                                      : null,
+                                )),
+                            _MeTile(
+                              icon: Icons.block_rounded,
+                              title: 'Blocked users',
+                              subtitle: 'Manage',
+                              onTap: controller.openBlockList,
+                            ),
+                            Obx(() => _MeToggleTile(
+                                  icon: Icons.pin_drop_rounded,
+                                  title: 'Show distance',
+                                  value: controller.showDistance.value,
+                                  onChanged: controller.setShowDistance, // ✅
+                                )),
+                            Obx(() => _MeToggleTile(
+                                  icon: Icons.circle_rounded,
+                                  title: 'Show online status',
+                                  value: controller.showOnlineStatus.value,
+                                  onChanged:
+                                      controller.setShowOnlineStatus, // ✅
+                                )),
+                            Obx(() => _MeToggleTile(
+                                  icon: Icons.mark_chat_read_rounded,
+                                  title: 'Read receipts',
+                                  value: controller.readReceipts.value,
+                                  onChanged: controller.setReadReceipts,
+                                  // ✅ (premium gate)
+                                  subtitle: 'Premium',
+                                )),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+
+                        // Account
+                        _MeSection(
+                          title: 'Account',
+                          children: [
+                            _MeTile(
+                              icon: Icons.notifications_rounded,
+                              title: 'Notifications',
+                              subtitle: 'Matches, chats, likes',
+                              onTap: controller.openNotifications,
+                            ),
+                            _MeTile(
+                              icon: Icons.workspace_premium_rounded,
+                              title: 'Subscription',
+                              subtitle: 'Manage plan',
+                              onTap: controller.openSubscription,
+                              trailing: Pill(
+                                text: 'PRO',
+                                color: electric,
+                              ),
+                            ),
+                            _MeTile(
+                              icon: Icons.link_rounded,
+                              title: 'Connected accounts',
+                              subtitle: 'Google / Apple',
+                              onTap: controller.openConnectedAccounts,
+                            ),
+                            _MeTile(
+                              icon: Icons.logout_rounded,
+                              title: 'Logout',
+                              subtitle: '',
+                              onTap: controller.logout,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 15),
+
+                        _MeDangerTile(
+                          title: 'Delete account',
+                          subtitle: 'This can’t be undone',
+                          onTap: controller.deleteAccount,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -239,11 +235,13 @@ class _MeProfileCard extends StatelessWidget {
                     color: lemonade.withOpacity(0.08),
                     border: Border.all(color: lemonade.withOpacity(0.15)),
                     image: photo.isNotEmpty
-                        ? DecorationImage(image: NetworkImage(photo), fit: BoxFit.cover)
+                        ? DecorationImage(
+                            image: NetworkImage(photo), fit: BoxFit.cover)
                         : null,
                   ),
                   child: photo.isEmpty
-                      ? Icon(Icons.person_rounded, color: lemonade.withOpacity(0.85))
+                      ? Icon(Icons.person_rounded,
+                          color: lemonade.withOpacity(0.85))
                       : null,
                 ),
                 const SizedBox(width: 12),
@@ -267,7 +265,10 @@ class _MeProfileCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 8),
                           if (controller.verified.value)
-                            const _Pill(text: 'Verified'),
+                            Pill(
+                              text: 'Verified',
+                              color: electric,
+                            ),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -636,18 +637,18 @@ class _MeToggleTile extends StatelessWidget {
                     ),
                   ),
                   if (subtitle != null && subtitle!.isNotEmpty)
-                    _Pill(text: subtitle!),
+                    Pill(
+                      text: subtitle!,
+                      color: electric,
+                    ),
                 ],
               ),
             ],
           ),
         ),
-        Switch.adaptive(
+        AppSwitch(
           value: value,
           onChanged: onChanged,
-          activeColor: lemonade.withOpacity(0.95),
-          inactiveThumbColor: lemonade.withOpacity(0.35),
-          inactiveTrackColor: lemonade.withOpacity(0.12),
         ),
       ],
     );
@@ -670,9 +671,9 @@ class _MeDangerTile extends StatelessWidget {
     return BounceButton(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(20),
           color: whiteSkin,
           border: Border.all(color: lemonade.withOpacity(0.2)),
         ),
@@ -682,8 +683,8 @@ class _MeDangerTile extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                color: lemonade.withOpacity(0.06),
+                borderRadius: BorderRadius.circular(15),
+                color: lemonade.withOpacity(0.05),
                 border: Border.all(color: lemonade.withOpacity(0.2)),
               ),
               child: Icon(Icons.delete_forever_rounded,
@@ -717,27 +718,27 @@ class _MeDangerTile extends StatelessWidget {
   }
 }
 
-class _Pill extends StatelessWidget {
-  final String text;
-
-  const _Pill({required this.text});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(999),
-        color: lemonade.withOpacity(0.10),
-        border: Border.all(color: lemonade.withOpacity(0.2)),
-      ),
-      child: Text(
-        text,
-        style: inconsolataStyle(
-            fontSize: 11,
-            color: lemonade.withOpacity(0.85),
-            fontWeight: FontWeight.w800),
-      ),
-    );
-  }
-}
+// class _Pill extends StatelessWidget {
+//   final String text;
+//
+//   const _Pill({required this.text});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+//       decoration: BoxDecoration(
+//         borderRadius: BorderRadius.circular(999),
+//         color: lemonade.withOpacity(0.10),
+//         border: Border.all(color: lemonade.withOpacity(0.2)),
+//       ),
+//       child: Text(
+//         text,
+//         style: inconsolataStyle(
+//             fontSize: 11,
+//             color: lemonade.withOpacity(0.85),
+//             fontWeight: FontWeight.w800),
+//       ),
+//     );
+//   }
+// }

@@ -8,7 +8,7 @@ class Navigation extends StatefulWidget {
 }
 
 class _NavigationState extends State<Navigation> {
-  final controller = Get.put(NavigationController());
+  final controller = Get.put(NavigationController(), permanent: true);
 
   static final List<Widget> _pages = [
     const Datting(),

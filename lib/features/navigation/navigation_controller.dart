@@ -10,6 +10,8 @@ class NavigationController extends GetxController {
     pageController.jumpToPage(index);
   }
 
+  void goToMeTab() => changeTab(2);
+
   @override
   void onClose() {
     pageController.dispose();

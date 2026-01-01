@@ -12,6 +12,7 @@ class DattingController extends GetxController {
     super.onInit();
 
     final me = AuthService.instance.currentUser;
+    debugPrint('ME UID = ${me?.uid}');
     if (me == null) {
       error.value = 'Not logged in';
       isLoading.value = false;

@@ -42,6 +42,7 @@ class _DattingState extends State<Datting> {
                     );
                   }
 
+                  debugPrint('ERROR NIH ${controller.error.value}');
                   if (controller.error.value.isNotEmpty) {
                     return Center(
                       child: Text(

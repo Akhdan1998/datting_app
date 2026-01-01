@@ -67,4 +67,5 @@ class DefaultFirebaseOptions {
     iosClientId: '915975936252-ca3riq3qqflgjqujb8ogpreo4vakdpqt.apps.googleusercontent.com',
     iosBundleId: 'com.akhdan.dattingApp',
   );
+
 }
