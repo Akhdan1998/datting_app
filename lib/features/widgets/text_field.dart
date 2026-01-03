@@ -23,6 +23,11 @@ class AppTextField extends StatelessWidget {
 
   final VoidCallback? onTap;
 
+  final Color? borderColor;
+  final Color? focusedBorderColor;
+  final Color? textColor;
+  final double borderRadius;
+
   const AppTextField({
     super.key,
     this.controller,
@@ -41,11 +46,28 @@ class AppTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.onTap,
+    this.borderColor,
+    this.focusedBorderColor,
+    this.textColor,
+    this.borderRadius = 16,
   });
 
   @override
   Widget build(BuildContext context) {
     assert(controller == null || initialValue == null);
+
+    final Color base = (borderColor ?? lemonade);
+    final Color focusBase = (focusedBorderColor ?? borderColor ?? lemonade);
+
+    final Color normal = base.withOpacity(0.12);
+    final Color focused = focusBase.withOpacity(0.28);
+    final Color disabled = base.withOpacity(0.08);
+    final Color error = redBull.withOpacity(0.45);
+
+    OutlineInputBorder b(Color c) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(borderRadius),
+          borderSide: BorderSide(color: c),
+        );
 
     return TextFormField(
       controller: controller,
@@ -69,22 +91,16 @@ class AppTextField extends StatelessWidget {
         fillColor: whiteBlue.withOpacity(0.06),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: lemonade.withOpacity(0.12)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: lemonade.withOpacity(0.12)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: lemonade.withOpacity(0.28)),
-        ),
+        border: b(normal),
+        enabledBorder: b(normal),
+        focusedBorder: b(focused),
+        disabledBorder: b(disabled),
+        errorBorder: b(error),
+        focusedErrorBorder: b(error),
       ),
       style: inconsolataStyle(
         fontSize: 13,
-        color: lemonade.withOpacity(0.90),
+        color: textColor ?? electric,
         fontWeight: FontWeight.w700,
       ),
       onFieldSubmitted: (_) {

@@ -121,6 +121,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: controller.nameCtrl,
                           hintText: 'Nama panggilan aja — ex: Pendekar Gendut',
                           maxLength: 24,
+                          textColor: lemonade,
                         ),
                         const SizedBox(height: 10),
                         Row(
@@ -148,6 +149,7 @@ class _EditProfileState extends State<EditProfile> {
                                       LengthLimitingTextInputFormatter(2),
                                     ],
                                     maxLength: 2,
+                                    textColor: lemonade,
                                   ),
                                 ],
                               ),
@@ -171,6 +173,7 @@ class _EditProfileState extends State<EditProfile> {
                                     controller: controller.cityCtrl,
                                     hintText: 'ex: Jakarta',
                                     maxLength: 24,
+                                    textColor: lemonade,
                                   ),
                                 ],
                               ),
@@ -193,7 +196,58 @@ class _EditProfileState extends State<EditProfile> {
                               'ex: “Coffee person. Weekend: gym + cari hidden gem. Kalau kamu suka banter, we’ll vibe.”',
                           maxLines: 4,
                           maxLength: 180,
+                          textColor: lemonade,
                         ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Gender',
+                          style: inconsolataStyle(
+                            fontSize: 12,
+                            color: lemonade.withOpacity(0.70),
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Obx(() {
+                          final selected = controller.gender.value;
+
+                          Widget genderButton({
+                            required String label,
+                            required Gender value,
+                          }) {
+                            final isActive = selected == value;
+
+                            return BounceButton(
+                              onTap: () => controller.gender.value = value,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 18, vertical: 10),
+                              color: isActive ? lemonade : electric,
+                              child: Text(
+                                label,
+                                style: inconsolataStyle(
+                                  color: isActive
+                                      ? electric
+                                      : lemonade.withOpacity(0.85),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            );
+                          }
+
+                          return Row(
+                            children: [
+                              genderButton(
+                                label: 'Male',
+                                value: Gender.male,
+                              ),
+                              const SizedBox(width: 12),
+                              genderButton(
+                                label: 'Female',
+                                value: Gender.female,
+                              ),
+                            ],
+                          );
+                        }),
                       ],
                     ),
                   ),
@@ -219,6 +273,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: controller.jobCtrl,
                           hintText: 'ex: Mobile Dev',
                           maxLength: 40,
+                          textColor: lemonade,
                         ),
                         const SizedBox(height: 10),
                         Text(
@@ -234,6 +289,7 @@ class _EditProfileState extends State<EditProfile> {
                           controller: controller.schoolCtrl,
                           hintText: 'ex: UI / ITB / etc (optional)',
                           maxLength: 50,
+                          textColor: lemonade,
                         ),
                         const SizedBox(height: 10),
                         Obx(() {

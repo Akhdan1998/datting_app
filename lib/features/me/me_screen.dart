@@ -51,12 +51,6 @@ class Me extends StatelessWidget {
                           title: 'Discovery',
                           children: [
                             Obx(() => _MeTile(
-                                  icon: Icons.location_on_rounded,
-                                  title: 'Location',
-                                  subtitle: controller.city.value,
-                                  onTap: controller.openLocation,
-                                )),
-                            Obx(() => _MeTile(
                                   icon: Icons.radar_rounded,
                                   title: 'Distance',
                                   subtitle: '${controller.distanceKm.value} km',
@@ -69,12 +63,12 @@ class Me extends StatelessWidget {
                                       '${controller.ageMin.value}–${controller.ageMax.value}',
                                   onTap: controller.openAgeRange,
                                 )),
-                            Obx(() => _MeTile(
-                                  icon: Icons.favorite_rounded,
-                                  title: 'Show me',
-                                  subtitle: controller.preference.value,
-                                  onTap: controller.openPreference,
-                                )),
+                            // Obx(() => _MeTile(
+                            //       icon: Icons.favorite_rounded,
+                            //       title: 'Show me',
+                            //       subtitle: controller.preference.value,
+                            //       onTap: controller.openPreference,
+                            //     )),
                             Obx(() => _MeToggleTile(
                                   icon: Icons.visibility_rounded,
                                   title: 'Show me on discovery',
@@ -86,9 +80,8 @@ class Me extends StatelessWidget {
                               title: 'Advanced filters',
                               subtitle: 'Premium',
                               onTap: controller.openFilters,
-                              trailing: Pill(
+                              trailing: const Pill(
                                 text: 'PRO',
-                                color: electric,
                               ),
                             ),
                           ],
@@ -109,7 +102,6 @@ class Me extends StatelessWidget {
                                   trailing: controller.verified.value
                                       ? Pill(
                                           text: 'OK',
-                                          color: electric,
                                         )
                                       : null,
                                 )),
@@ -123,21 +115,20 @@ class Me extends StatelessWidget {
                                   icon: Icons.pin_drop_rounded,
                                   title: 'Show distance',
                                   value: controller.showDistance.value,
-                                  onChanged: controller.setShowDistance, // ✅
+                                  onChanged: controller.setShowDistance,
                                 )),
                             Obx(() => _MeToggleTile(
                                   icon: Icons.circle_rounded,
                                   title: 'Show online status',
                                   value: controller.showOnlineStatus.value,
                                   onChanged:
-                                      controller.setShowOnlineStatus, // ✅
+                                      controller.setShowOnlineStatus,
                                 )),
                             Obx(() => _MeToggleTile(
                                   icon: Icons.mark_chat_read_rounded,
                                   title: 'Read receipts',
                                   value: controller.readReceipts.value,
                                   onChanged: controller.setReadReceipts,
-                                  // ✅ (premium gate)
                                   subtitle: 'Premium',
                                 )),
                           ],
@@ -161,7 +152,6 @@ class Me extends StatelessWidget {
                               onTap: controller.openSubscription,
                               trailing: Pill(
                                 text: 'PRO',
-                                color: electric,
                               ),
                             ),
                             _MeTile(
@@ -267,7 +257,6 @@ class _MeProfileCard extends StatelessWidget {
                           if (controller.verified.value)
                             Pill(
                               text: 'Verified',
-                              color: electric,
                             ),
                         ],
                       ),
@@ -412,70 +401,48 @@ class _QuickAction extends StatelessWidget {
   Widget build(BuildContext context) {
     return BounceButton(
       onTap: onTap,
-      child: Container(
-        // padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        // decoration: BoxDecoration(
-        //   borderRadius: BorderRadius.circular(18),
-        //   color: whiteSkin,
-        //   border: Border.all(color: lemonade.withOpacity(0.2)),
-        // ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: lemonade.withOpacity(0.10),
-                    border: Border.all(color: lemonade.withOpacity(0.2)),
-                  ),
-                  child:
-                      Icon(icon, color: lemonade.withOpacity(0.85), size: 18),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: lemonade.withOpacity(0.10),
+                  border: Border.all(color: lemonade.withOpacity(0.2)),
                 ),
-                if (badge > 0)
-                  Positioned(
-                    right: -6,
-                    top: -6,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: electric,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: lemonade.withOpacity(0.25)),
-                      ),
-                      child: Text(
-                        badge.toString(),
-                        style: inconsolataStyle(
-                            fontSize: 11,
-                            color: lemonade,
-                            fontWeight: FontWeight.w800),
-                      ),
+                child:
+                    Icon(icon, color: lemonade.withOpacity(0.85), size: 18),
+              ),
+              if (badge > 0)
+                Positioned(
+                  right: -6,
+                  top: -6,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: electric,
+                      borderRadius: BorderRadius.circular(999),
+                      border: Border.all(color: lemonade.withOpacity(0.25)),
+                    ),
+                    child: Text(
+                      badge.toString(),
+                      style: inconsolataStyle(
+                          fontSize: 11,
+                          color: lemonade,
+                          fontWeight: FontWeight.w800),
                     ),
                   ),
-              ],
-            ),
-            // const SizedBox(width: 10),
-            // Expanded(
-            //   child: Text(
-            //     label,
-            //     maxLines: 1,
-            //     overflow: TextOverflow.ellipsis,
-            //     style: inconsolataStyle(
-            //         fontSize: 13,
-            //         color: lemonade.withOpacity(0.85),
-            //         fontWeight: FontWeight.w700),
-            //   ),
-            // ),
-            // Icon(Icons.chevron_right_rounded,
-            //     color: lemonade.withOpacity(0.35)),
-          ],
-        ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -633,13 +600,13 @@ class _MeToggleTile extends StatelessWidget {
                       style: inconsolataStyle(
                           fontSize: 14,
                           color: lemonade.withOpacity(0.92),
-                          fontWeight: FontWeight.w700),
+                          fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
                   if (subtitle != null && subtitle!.isNotEmpty)
                     Pill(
                       text: subtitle!,
-                      color: electric,
                     ),
                 ],
               ),
@@ -717,28 +684,3 @@ class _MeDangerTile extends StatelessWidget {
     );
   }
 }
-
-// class _Pill extends StatelessWidget {
-//   final String text;
-//
-//   const _Pill({required this.text});
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-//       decoration: BoxDecoration(
-//         borderRadius: BorderRadius.circular(999),
-//         color: lemonade.withOpacity(0.10),
-//         border: Border.all(color: lemonade.withOpacity(0.2)),
-//       ),
-//       child: Text(
-//         text,
-//         style: inconsolataStyle(
-//             fontSize: 11,
-//             color: lemonade.withOpacity(0.85),
-//             fontWeight: FontWeight.w800),
-//       ),
-//     );
-//   }
-// }

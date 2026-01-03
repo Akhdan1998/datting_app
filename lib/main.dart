@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   static const SystemUiOverlayStyle _overlay = SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
+    statusBarColor: transparentColor,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
     systemStatusBarContrastEnforced: false,

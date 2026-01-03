@@ -51,30 +51,37 @@ class AuthService {
 
   Future<(UserCredential cred, bool isNewUser)> signInWithGoogle() async {
     debugPrint('[AuthService] signInWithGoogle start');
-    try {
-      final googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) throw Exception('Sign-in cancelled');
 
-      final googleAuth = await googleUser.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-        accessToken: googleAuth.accessToken,
-      );
-
-      final userCred = await _auth.signInWithCredential(credential);
-
-      final user = userCred.user;
-      bool isNewUser = false;
-      if (user != null) {
-        isNewUser = await _upsertCurrentUser(user);
-      }
-
-      debugPrint('[AuthService] signInWithGoogle success: uid=${user?.uid}');
-      return (userCred, isNewUser);
-    } finally {
-      debugPrint('[AuthService] signInWithGoogle end');
+    final googleUser = await _googleSignIn.signIn();
+    if (googleUser == null) {
+      throw Exception('Sign-in cancelled');
     }
+
+    final googleAuth = await googleUser.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      idToken: googleAuth.idToken,
+      accessToken: googleAuth.accessToken,
+    );
+
+    final userCred = await _auth.signInWithCredential(credential);
+
+    await _auth.authStateChanges().first;
+
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User is null after sign-in');
+    }
+
+    await user.getIdToken(true);
+
+    final isNewUser = userCred.additionalUserInfo?.isNewUser ?? false;
+
+    debugPrint(
+      '[AuthService] signInWithGoogle success uid=${user.uid} isNew=$isNewUser',
+    );
+
+    return (userCred, isNewUser);
   }
 
   Future<UserCredential> signInWithApple() async {

@@ -6,8 +6,12 @@ class DatingUser {
   final String? email;
   final String? photoUrl;
   final int? age;
+  final double? lat;
+  final double? lng;
   final String? city;
   final String? provider;
+  final Gender? gender;
+  final Gender? showMe;
   final bool isProfileComplete;
 
   const DatingUser({
@@ -16,22 +20,23 @@ class DatingUser {
     this.email,
     this.photoUrl,
     this.age,
+    this.lat,
+    this.lng,
     this.city,
     this.provider,
+    this.gender,
+    this.showMe,
     this.isProfileComplete = false,
   });
 
-  /// Private: simpan yang sensitif (email/provider)
   Map<String, dynamic> toPrivateMap() => {
         'uid': uid,
         'email': email ?? '',
         'provider': provider ?? '',
-        // createdAt biar aman, nanti kalau sudah ada tidak diubah (rules kamu cek createdAt tidak berubah)
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-  /// Public: buat discover (tidak ada email)
   Map<String, dynamic> toPublicMap() => {
         'uid': uid,
         'name': name,
@@ -39,9 +44,7 @@ class DatingUser {
         'age': age,
         'city': city,
         'isProfileComplete': isProfileComplete,
-        // updatedAt wajib ada (rules kamu)
         'updatedAt': FieldValue.serverTimestamp(),
-        // createdAt akan kita set hanya saat doc pertama kali dibuat via transaksi
       };
 
   factory DatingUser.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -50,11 +53,14 @@ class DatingUser {
       uid: (map['uid'] ?? doc.id) as String,
       name: map['name'] as String?,
       email: map['email'] as String?,
-      // biasanya tidak ada di publicProfiles
       photoUrl: map['photoUrl'] as String?,
       age: (map['age'] as num?)?.toInt(),
+      lat: (map['lat'] as num?)?.toDouble(),
+      lng: (map['lng'] as num?)?.toDouble(),
       city: map['city'] as String?,
       provider: map['provider'] as String?,
+      gender: GenderX.from(map['gender']),
+      showMe: GenderX.from(map['showMe']),
       isProfileComplete: (map['isProfileComplete'] as bool?) ?? false,
     );
   }

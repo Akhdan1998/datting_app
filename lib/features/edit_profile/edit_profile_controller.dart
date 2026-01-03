@@ -3,7 +3,7 @@ part of '../../pages.dart';
 class EditProfileController extends GetxController {
   final isLoading = true.obs;
   final isSaving = false.obs;
-
+  final gender = Rxn<Gender>();
   final nameCtrl = TextEditingController();
   final ageCtrl = TextEditingController();
   final cityCtrl = TextEditingController();
@@ -181,75 +181,74 @@ class EditProfileController extends GetxController {
     if (isSaving.value) return;
 
     final uid = _uid;
-    if (uid.isEmpty) return;
-
-    final name = nameCtrl.text.trim();
-    final age = int.tryParse(ageCtrl.text.trim());
-    final city = cityCtrl.text.trim();
-    final bio = bioCtrl.text.trim();
-
-    // if (name.isEmpty ||
-    //     age == null ||
-    //     city.isEmpty ||
-    //     bio.length < 20 ||
-    //     photos.isEmpty) {
-    //   Get.snackbar(
-    //     'Almost there',
-    //     'Isi minimal: name, age, city, bio (min 20 chars), dan 1 photo.',
-    //   );
-    //   return;
-    // }
+    if (uid.isEmpty) {
+      debugPrint('[EditProfileController] save aborted: uid is empty');
+      return;
+    }
 
     isSaving.value = true;
 
-    try {
-      final cleanPhotos =
-          photos.where((e) => e.trim().isNotEmpty).take(3).toList();
-      final firstPhoto = cleanPhotos.isNotEmpty ? cleanPhotos.first : '';
+    debugPrint('[EditProfileController] save started uid=$uid');
 
+    try {
       final data = <String, dynamic>{
         'uid': uid,
-        'name': name,
-        'age': age,
-        'city': city,
-        'bio': bio,
+        'name': nameCtrl.text.trim(),
+        'age': int.tryParse(ageCtrl.text.trim()),
+        'city': cityCtrl.text.trim(),
+        'bio': bioCtrl.text.trim(),
         'job': jobCtrl.text.trim(),
         'school': schoolCtrl.text.trim(),
         'heightCm': heightCm.value,
-        'photoUrl': firstPhoto,
-        'photos': cleanPhotos,
+        'photos': photos.toList(),
+        'photoUrl': photos.isNotEmpty ? photos.first : '',
         'interests': interests.toList(),
         'promptGreenFlag': promptGreenFlagCtrl.text.trim(),
         'promptWeekend': promptWeekendCtrl.text.trim(),
         'promptGetAlong': promptGetAlongCtrl.text.trim(),
+        'gender': gender.value?.value,
+        'showMe': gender.value?.opposite.value,
         'showOnDiscovery': showOnDiscovery.value,
         'isProfileComplete': true,
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      final ref =
-          FirebaseFirestore.instance.collection('publicProfiles').doc(uid);
-      await FirebaseFirestore.instance.runTransaction((tx) async {
-        final snap = await tx.get(ref);
-        if (!snap.exists) {
-          data['createdAt'] = FieldValue.serverTimestamp();
-        } else {
-          final existing = snap.data();
-          if (existing != null && existing['createdAt'] != null) {
-            data['createdAt'] = existing['createdAt'];
-          }
-        }
-        tx.set(ref, data, SetOptions(merge: true));
-      });
+      debugPrint('[EditProfileController] save payload → ${data.keys.toList()}');
 
-      _recalc();
+      final ref = FirebaseFirestore.instance
+          .collection('publicProfiles')
+          .doc(uid);
+
+      await ref.set(data, SetOptions(merge: true));
+
+      debugPrint('[EditProfileController] save success uid=$uid');
+
       Get.snackbar('Saved', 'Profil kamu berhasil diperbarui');
-      Get.back();
-    } catch (e) {
-      debugPrint('[EditProfileController] save error: $e');
-      Get.snackbar('Save failed', e.toString());
+      Get.back(result: true);
+
+    } on FirebaseException catch (e, st) {
+      debugPrint(
+        '[EditProfileController] FIREBASE ERROR '
+            'code=${e.code} message=${e.message}',
+      );
+      debugPrint(st.toString());
+
+      Get.snackbar(
+        'Save failed',
+        e.message ?? 'Firebase error',
+      );
+
+    } catch (e, st) {
+      debugPrint('[EditProfileController] UNKNOWN ERROR: $e');
+      debugPrint(st.toString());
+
+      Get.snackbar(
+        'Save failed',
+        e.toString(),
+      );
     } finally {
       isSaving.value = false;
+      debugPrint('[EditProfileController] save finished uid=$uid');
     }
   }
 }

@@ -5,7 +5,7 @@ class ChatRepo {
 
   static final instance = ChatRepo._();
 
-  final _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   String buildRoomId(String a, String b) {
     final pair = [a, b]..sort();
@@ -22,17 +22,33 @@ class ChatRepo {
     required String myUid,
     required String otherUid,
   }) async {
+    if (myUid == otherUid) {
+      throw Exception('Cannot create room with yourself');
+    }
+
     final roomId = buildRoomId(myUid, otherUid);
-    final ref = roomRef(roomId);
+    final roomRef = this.roomRef(roomId);
+
+    final matchId = buildRoomId(myUid, otherUid);
+    final matchSnap = await _db.collection('matches').doc(matchId).get();
+
+    if (!matchSnap.exists) {
+      throw Exception('Chat not allowed before match');
+    }
 
     await _db.runTransaction((tx) async {
-      final snap = await tx.get(ref);
+      final snap = await tx.get(roomRef);
+
       if (!snap.exists) {
-        final room = ChatRoom(
-          id: roomId,
-          members: ([myUid, otherUid]..sort()),
-        );
-        tx.set(ref, room.toMap(forCreate: true));
+        tx.set(roomRef, {
+          'members': [myUid, otherUid]..sort(),
+          'createdAt': FieldValue.serverTimestamp(),
+          'lastAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        tx.update(roomRef, {
+          'lastAt': FieldValue.serverTimestamp(),
+        });
       }
     });
 
@@ -48,7 +64,10 @@ class ChatRepo {
         .map((q) => q.docs.map((d) => ChatRoom.fromDoc(d)).toList());
   }
 
-  Stream<List<ChatMessage>> streamMessages(String roomId, {int limit = 50}) {
+  Stream<List<ChatMessage>> streamMessages(
+    String roomId, {
+    int limit = 50,
+  }) {
     return msgCol(roomId)
         .orderBy('createdAt', descending: true)
         .limit(limit)
@@ -62,24 +81,24 @@ class ChatRepo {
     required String text,
   }) async {
     final room = roomRef(roomId);
-    final msgs = msgCol(roomId);
-    final msgDoc = msgs.doc();
+    final msgs = msgCol(roomId).doc();
 
     await _db.runTransaction((tx) async {
-      tx.set(msgDoc, {
+      tx.set(msgs, {
         'senderId': senderId,
         'text': text,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
       tx.set(
-          room,
-          {
-            'lastMessage': text,
-            'lastSenderId': senderId,
-            'lastAt': FieldValue.serverTimestamp(),
-          },
-          SetOptions(merge: true));
+        room,
+        {
+          'lastMessage': text,
+          'lastSenderId': senderId,
+          'lastAt': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
     });
   }
 }

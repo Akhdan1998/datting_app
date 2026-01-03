@@ -48,15 +48,16 @@ class SwipeDeckState<T> extends State<SwipeDeck<T>>
   @override
   void initState() {
     super.initState();
-    SwipeDeckController._lastState = this;
 
     _anim = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 220),
     )..addListener(() {
-        if (!mounted) return;
-        if (_offsetAnim != null) setState(() => _drag = _offsetAnim!.value);
-      });
+      if (!mounted) return;
+      if (_offsetAnim != null) {
+        setState(() => _drag = _offsetAnim!.value);
+      }
+    });
   }
 
   @override
@@ -84,9 +85,6 @@ class SwipeDeckState<T> extends State<SwipeDeck<T>>
 
   @override
   void dispose() {
-    if (SwipeDeckController._lastState == this) {
-      SwipeDeckController._lastState = null;
-    }
     _anim.dispose();
     super.dispose();
   }

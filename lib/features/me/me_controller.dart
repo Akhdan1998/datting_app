@@ -12,9 +12,9 @@ class MeController extends GetxController {
   final email = ''.obs;
   final photoUrl = ''.obs;
 
-  final age = 24.obs;
-  final city = 'Jakarta'.obs;
-  final job = 'Mobile Developer'.obs;
+  final age = RxnInt();
+  final city = ''.obs;
+  final job = ''.obs;
 
   // verified (photo verification)
   final verified = false.obs;
@@ -28,16 +28,16 @@ class MeController extends GetxController {
   final superLikes = 0.obs;
 
   // toggles / privacy
-  final showOnDiscovery = true.obs; // publicProfiles
-  final showDistance = true.obs; // users
-  final showOnlineStatus = true.obs; // users
-  final readReceipts = false.obs; // users (premium)
+  final showOnDiscovery = true.obs;
+  final showDistance = true.obs;
+  final showOnlineStatus = true.obs;
+  final readReceipts = false.obs;
 
   // discovery values
-  final distanceKm = 10.obs; // users
-  final ageMin = 22.obs; // users
-  final ageMax = 30.obs; // users
-  final preference = 'Women'.obs; // users
+  final distanceKm = 10.obs;
+  final ageMin = 22.obs;
+  final ageMax = 30.obs;
+  final preference = 'Women'.obs;
 
   // notif settings (users)
   final notifMatches = true.obs;
@@ -73,29 +73,31 @@ class MeController extends GetxController {
       _applyUser(u);
       await _bindDocs();
     });
-
-    _bindDocs();
   }
 
   void _applyUser(User? user) {
     if (user == null) {
+      debugPrint('[MeController] auth null → cancelling listeners');
+
+      _publicSub?.cancel();
+      _userSub?.cancel();
+      _publicSub = null;
+      _userSub = null;
+
       uid.value = '';
       name.value = 'Guest';
       email.value = '';
       photoUrl.value = '';
       verified.value = false;
       isLoading.value = false;
+
       return;
     }
 
     uid.value = user.uid;
     email.value = user.email ?? '';
-    name.value = (user.displayName?.trim().isNotEmpty ?? false)
-        ? user.displayName!.trim()
-        : (email.value.isNotEmpty ? email.value.split('@').first : 'User');
-
+    name.value = user.displayName ?? 'User';
     photoUrl.value = user.photoURL ?? '';
-    AppLog.d(_tag, 'applyUser name=${name.value} uid=${uid.value}');
   }
 
   Future<void> _bindDocs() async {
@@ -112,29 +114,45 @@ class MeController extends GetxController {
 
     await _ensureDocs();
 
-    _publicSub = _publicRef.snapshots().listen((snap) {
-      final data = snap.data();
-      if (data == null) return;
+    _publicSub = _publicRef.snapshots().listen(
+      (snap) {
+        if (_uid.isEmpty) return;
+        final data = snap.data();
+        if (data == null) return;
 
-      name.value = (data['name'] ?? name.value).toString();
-      city.value = (data['city'] ?? city.value).toString();
-      job.value = (data['job'] ?? job.value).toString();
-      photoUrl.value = (data['photoUrl'] ?? photoUrl.value).toString();
+        name.value = (data['name'] ?? name.value).toString();
+        city.value = (data['city'] ?? city.value).toString();
+        job.value = (data['job'] ?? job.value).toString();
+        photoUrl.value = (data['photoUrl'] ?? photoUrl.value).toString();
 
-      final a = data['age'];
-      if (a is num) age.value = a.toInt();
+        final a = data['age'];
+        if (a is num) age.value = a.toInt();
 
-      final sod = data['showOnDiscovery'];
-      if (sod is bool) showOnDiscovery.value = sod;
+        final sod = data['showOnDiscovery'];
+        if (sod is bool) showOnDiscovery.value = sod;
 
-      final pv = data['photoVerified'];
-      if (pv is bool) verified.value = pv;
+        final pv = data['photoVerified'];
+        if (pv is bool) verified.value = pv;
 
-      completion.value = _computeCompletionFromPublic(data);
+        final newCompletion = _computeCompletionFromPublic(data);
 
-      AppLog.d(_tag,
-          'publicProfiles updated city=${city.value} completion=${completion.value}');
-    }, onError: (e, st) => AppLog.e(_tag, e, st));
+        if (completion.value != newCompletion) {
+          completion.value = newCompletion;
+
+          AppLog.d(
+            _tag,
+            'publicProfiles updated city=${city.value} completion=$newCompletion',
+          );
+        }
+      },
+      onError: (e, st) {
+        if (e is FirebaseException && e.code == 'permission-denied') {
+          debugPrint('[MeController] snapshot blocked (logged out)');
+          return;
+        }
+        AppLog.e(_tag, e, st);
+      },
+    );
 
     _userSub = _userRef.snapshots().listen((snap) {
       final data = snap.data();
@@ -239,7 +257,7 @@ class MeController extends GetxController {
           'city': city.value,
           'job': job.value,
           'photoUrl': photoUrl.value,
-          'showOnDiscovery': true,
+          'showOnDiscovery': false,
           'photoVerified': false,
           'isProfileComplete': false,
           'createdAt': FieldValue.serverTimestamp(),
@@ -283,11 +301,19 @@ class MeController extends GetxController {
     Get.snackbar('Settings', 'Coming soon ✨');
   }
 
-  void openEditProfile() {
+  Future<void> openEditProfile() async {
     if (Get.isRegistered<EditProfileController>()) {
       Get.delete<EditProfileController>(force: true);
     }
-    Get.to(() => const EditProfile());
+
+    final result = await Get.to<bool>(() => const EditProfile());
+
+    if (result == true) {
+      if (Get.isRegistered<DattingController>()) {
+        final dating = Get.find<DattingController>();
+        await dating.refreshAfterProfileUpdated();
+      }
+    }
   }
 
   void openPreviewProfile() {
@@ -296,27 +322,6 @@ class MeController extends GetxController {
   }
 
   // ================== DISCOVERY PICKERS ==================
-
-  Future<void> openLocation() async {
-    AppLog.d(_tag, 'openLocation');
-
-    final res = await Sheets.inputText(
-      title: 'Location',
-      hint: 'ex: Jakarta',
-      initial: city.value,
-      icon: Icons.location_on_rounded,
-      primaryText: 'Save',
-      secondaryText: 'Cancel aja',
-      accentColor: electric,
-    );
-
-    if (res == null) return;
-    final v = res.trim();
-    if (v.isEmpty) return;
-
-    city.value = v;
-    await _savePublic({'city': v});
-  }
 
   Future<void> openDistance() async {
     AppLog.d(_tag, 'openDistance');
@@ -357,22 +362,22 @@ class MeController extends GetxController {
     await _saveUser({'ageMin': res[0], 'ageMax': res[1]});
   }
 
-  Future<void> openPreference() async {
-    AppLog.d(_tag, 'openPreference');
-
-    final options = ['Women', 'Men', 'Everyone'];
-    final res = await Sheets.pickOne(
-      title: 'Show me',
-      options: options,
-      selected: preference.value,
-      icon: Icons.favorite_rounded,
-      accentColor: electric,
-    );
-
-    if (res == null) return;
-    preference.value = res;
-    await _saveUser({'preference': res});
-  }
+  // Future<void> openPreference() async {
+  //   AppLog.d(_tag, 'openPreference');
+  //
+  //   final options = ['Women', 'Men', 'Everyone'];
+  //   final res = await Sheets.pickOne(
+  //     title: 'Show me',
+  //     options: options,
+  //     selected: preference.value,
+  //     icon: Icons.favorite_rounded,
+  //     accentColor: electric,
+  //   );
+  //
+  //   if (res == null) return;
+  //   preference.value = res;
+  //   await _saveUser({'preference': res});
+  // }
 
   // ================== TOGGLES (AUTO SAVE) ==================
 
@@ -418,24 +423,18 @@ class MeController extends GetxController {
   Future<void> openVerification() async {
     AppLog.d(_tag, 'openVerification');
     if (verified.value) {
-      Get.snackbar('Verified', 'Kamu sudah verified ✅');
+      Get.snackbar('Verified', 'Kamu sudah verified');
       return;
     }
 
-    final ok = await Get.dialog<bool>(
-      AlertDialog(
-        title: const Text('Photo verification'),
-        content: const Text('Simulasi verifikasi (demo). Lanjutkan?'),
-        actions: [
-          TextButton(
-              onPressed: () => Get.back(result: false),
-              child: const Text('Cancel')),
-          TextButton(
-              onPressed: () => Get.back(result: true),
-              child: const Text('Verify')),
-        ],
-      ),
-      barrierDismissible: true,
+    final ok = await SDialog.show(
+      title: 'Photo verification',
+      message: 'Simulasi verifikasi. Lanjutkan?',
+      icon: Icons.person,
+      // pillText: 'OUT',
+      primaryText: 'Verify',
+      secondaryText: 'Cancel',
+      accentColor: electric,
     );
 
     if (ok != true) return;
@@ -443,7 +442,7 @@ class MeController extends GetxController {
     verified.value = true;
     await _savePublic({'photoVerified': true});
     await _saveUser({'photoVerified': true});
-    Get.snackbar('Verified ✅', 'Photo verification sukses (demo).');
+    Get.snackbar('Verified', 'Photo verification sukses');
   }
 
   void openBlockList() {
@@ -470,8 +469,23 @@ class MeController extends GetxController {
 
   Future<void> logout() async {
     AppLog.d(_tag, 'logout');
+
+    final confirm = await SDialog.show(
+      title: 'Keluar account?',
+      message: 'Anda yakin ingin keluar dari akun ini?',
+      icon: Icons.logout_rounded,
+      primaryText: 'Keluar',
+      secondaryText: 'Cancel aja',
+      accentColor: electric,
+    );
+
+    if (confirm != true) return;
+
     await safeRun(_tag, () async {
       await AuthService.instance.signOut();
+      Get.delete<DattingController>(force: true);
+      Get.delete<ChatListController>(force: true);
+      Get.delete<MeController>(force: true);
       Get.offAll(() => const SignIn());
     }, userMessage: 'Logout gagal');
   }
@@ -483,7 +497,6 @@ class MeController extends GetxController {
       title: 'Delete account?',
       message: 'This can’t be undone. Kamu beneran yakin?',
       icon: Icons.delete_forever_rounded,
-      pillText: 'DANGER',
       primaryText: 'Delete',
       secondaryText: 'Cancel aja',
       accentColor: electric,

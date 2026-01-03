@@ -53,10 +53,39 @@ class SignInController extends GetxController {
     isLoadingApple.value = true;
 
     try {
-      final cred = await AuthService.instance.signInWithApple();
-      debugPrint('[SignInController] loginApple ok uid=${cred.user?.uid}');
+      final (cred, _) = await AuthService.instance.signInWithGoogle();
 
       Get.offAll(() => const Navigation());
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        final uid = cred.user!.uid;
+        final snap = await FirebaseFirestore.instance
+            .collection('publicProfiles')
+            .doc(uid)
+            .get();
+
+        final isComplete = snap.data()?['isProfileComplete'] == true;
+
+        if (!isComplete) {
+          final nav = Get.find<NavigationController>();
+          nav.goToMeTab();
+
+          Future.delayed(const Duration(milliseconds: 200), () {
+            Get.defaultDialog(
+              title: 'Lengkapi Profil',
+              middleText:
+                  'Agar akunmu bisa tampil di Discover dan mulai swipe, lengkapi profil dulu ya.',
+              textConfirm: 'Lengkapi sekarang',
+              textCancel: 'Nanti',
+              barrierDismissible: false,
+              onConfirm: () {
+                Get.back();
+                Get.to(() => const EditProfile());
+              },
+            );
+          });
+        }
+      });
     } catch (e, st) {
       debugPrint('[SignInController] loginApple ERROR: $e');
       debugPrintStack(

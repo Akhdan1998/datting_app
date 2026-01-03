@@ -12,7 +12,7 @@ class _NavigationState extends State<Navigation> {
 
   static final List<Widget> _pages = [
     const Datting(),
-    const ChatHome(),
+    const ChatListPage(),
     const Me(),
   ];
 

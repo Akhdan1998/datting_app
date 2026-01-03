@@ -8,7 +8,7 @@ class ChatRoom {
   final Timestamp? lastAt;
   final Timestamp? createdAt;
 
-  const ChatRoom({
+  ChatRoom({
     required this.id,
     required this.members,
     this.lastMessage,
@@ -26,14 +26,14 @@ class ChatRoom {
   };
 
   factory ChatRoom.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final m = doc.data() ?? {};
+    final d = doc.data()!;
     return ChatRoom(
       id: doc.id,
-      members: List<String>.from((m['members'] ?? const []) as List),
-      lastMessage: m['lastMessage'] as String?,
-      lastSenderId: m['lastSenderId'] as String?,
-      lastAt: m['lastAt'] as Timestamp?,
-      createdAt: m['createdAt'] as Timestamp?,
+      members: List<String>.from(d['members']),
+      lastMessage: d['lastMessage'],
+      lastSenderId: d['lastSenderId'],
+      lastAt: d['lastAt'],
+      createdAt: d['createdAt'],
     );
   }
 }

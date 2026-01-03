@@ -5,7 +5,6 @@ class SDialog {
     required String title,
     required String message,
     IconData icon = Icons.auto_awesome_rounded,
-    String? pillText,
     String primaryText = 'Okay',
     String secondaryText = 'Cancel',
     bool showSecondary = true,
@@ -13,19 +12,14 @@ class SDialog {
     Color? accentColor,
     VoidCallback? onPrimary,
   }) {
-    final theme = Get.theme;
-    final accent = accentColor ?? theme.colorScheme.primary;
-
     return Get.dialog<bool>(
       _ConfirmDialog(
         title: title,
         message: message,
         icon: icon,
-        pillText: pillText,
         primaryText: primaryText,
         secondaryText: secondaryText,
         showSecondary: showSecondary,
-        accent: accent,
         onPrimary: onPrimary,
       ),
       barrierDismissible: barrierDismissible,
@@ -34,84 +28,6 @@ class SDialog {
 }
 
 class Sheets {
-  static Future<String?> inputText({
-    required String title,
-    required String hint,
-    String? initial,
-    IconData icon = Icons.edit_rounded,
-    String primaryText = 'Save',
-    String secondaryText = 'Cancel',
-    Color? accentColor,
-    int maxLen = 40,
-  }) async {
-    final ctrl = TextEditingController(text: initial ?? '');
-    final theme = Get.theme;
-    final accent = accentColor ?? theme.colorScheme.primary;
-
-    return Get.bottomSheet<String?>(
-      SafeArea(
-        top: false,
-        child: _SheetShell(
-          title: title,
-          icon: icon,
-          accent: accent,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: ctrl,
-                maxLength: maxLen,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                  hintText: hint,
-                  counterText: '',
-                  filled: true,
-                  fillColor: theme.colorScheme.onSurface.withOpacity(0.05),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide(
-                      color: theme.colorScheme.onSurface.withOpacity(0.10),
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide(
-                      color: theme.colorScheme.onSurface.withOpacity(0.10),
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide(color: accent.withOpacity(0.55)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                    child: GhostButton(
-                      text: secondaryText,
-                      onTap: () => Get.back(result: null),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: PrimaryButton(
-                      text: primaryText,
-                      color: accent,
-                      onTap: () => Get.back(result: ctrl.text.trim()),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
-
   static Future<String?> pickOne({
     required String title,
     required List<String> options,
@@ -120,8 +36,6 @@ class Sheets {
     String? pillText,
     Color? accentColor,
   }) async {
-    final theme = Get.theme;
-    final accent = accentColor ?? theme.colorScheme.primary;
 
     return Get.bottomSheet<String?>(
       SafeArea(
@@ -129,7 +43,6 @@ class Sheets {
         child: _SheetShell(
           title: title,
           icon: icon,
-          accent: accent,
           pillText: pillText,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -146,12 +59,12 @@ class Sheets {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(18),
                       color: active
-                          ? accent.withOpacity(0.10)
-                          : theme.colorScheme.onSurface.withOpacity(0.04),
+                          ? electric.withOpacity(0.10)
+                          : electric.withOpacity(0.04),
                       border: Border.all(
                         color: active
-                            ? accent.withOpacity(0.35)
-                            : theme.colorScheme.onSurface.withOpacity(0.08),
+                            ? electric.withOpacity(0.35)
+                            : electric.withOpacity(0.08),
                       ),
                     ),
                     child: Row(
@@ -159,8 +72,9 @@ class Sheets {
                         Expanded(
                           child: Text(
                             o,
-                            style: theme.textTheme.bodyLarge?.copyWith(
+                            style: inconsolataStyle(
                               fontWeight: FontWeight.w800,
+                              color: electric,
                             ),
                           ),
                         ),
@@ -169,8 +83,8 @@ class Sheets {
                               ? Icons.check_circle_rounded
                               : Icons.circle_outlined,
                           color: active
-                              ? accent.withOpacity(0.95)
-                              : theme.colorScheme.onSurface.withOpacity(0.35),
+                              ? electric.withOpacity(0.95)
+                              : electric.withOpacity(0.35),
                         ),
                       ],
                     ),
@@ -199,8 +113,6 @@ class Sheets {
     IconData icon = Icons.cake_rounded,
     Color? accentColor,
   }) async {
-    final theme = Get.theme;
-    final accent = accentColor ?? theme.colorScheme.primary;
 
     int mn = start.clamp(min, max);
     int mx = end.clamp(min, max);
@@ -212,15 +124,15 @@ class Sheets {
           return _SheetShell(
             title: title,
             icon: icon,
-            accent: accent,
             pillText: pillText,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   '$mn – $mx',
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: inconsolataStyle(
                     fontWeight: FontWeight.w900,
+                    color: electric
                   ),
                 ),
                 RangeSlider(
@@ -228,6 +140,7 @@ class Sheets {
                   min: min.toDouble(),
                   max: max.toDouble(),
                   divisions: (max - min),
+                  activeColor: electric,
                   onChanged: (v) => setState(() {
                     mn = v.start.round();
                     mx = v.end.round();
@@ -246,7 +159,7 @@ class Sheets {
                     Expanded(
                       child: PrimaryButton(
                         text: 'Save',
-                        color: accent,
+                        color: electric,
                         onTap: () => Get.back(result: [mn, mx]),
                       ),
                     ),
@@ -271,8 +184,6 @@ class Sheets {
     IconData icon = Icons.radar_rounded,
     Color? accentColor,
   }) async {
-    final theme = Get.theme;
-    final accent = accentColor ?? theme.colorScheme.primary;
 
     int v = value.clamp(min, max);
 
@@ -283,21 +194,21 @@ class Sheets {
           return _SheetShell(
             title: title,
             icon: icon,
-            accent: accent,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   subtitle,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.70),
+                  style: inconsolataStyle(
+                    color: electric.withOpacity(0.70),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   '$v $unit',
-                  style: theme.textTheme.titleLarge?.copyWith(
+                  style: inconsolataStyle(
                     fontWeight: FontWeight.w900,
+                    color: electric,
                   ),
                 ),
                 Slider(
@@ -306,6 +217,7 @@ class Sheets {
                   max: max.toDouble(),
                   divisions: (max - min),
                   onChanged: (nv) => setState(() => v = nv.round()),
+                  activeColor: electric,
                 ),
                 const SizedBox(height: 8),
                 Row(
@@ -320,7 +232,7 @@ class Sheets {
                     Expanded(
                       child: PrimaryButton(
                         text: 'Save',
-                        color: accent,
+                        color: whiteSkin,
                         onTap: () => Get.back(result: v),
                       ),
                     ),
@@ -344,7 +256,6 @@ class _ConfirmDialog extends StatelessWidget {
   final String primaryText;
   final String secondaryText;
   final bool showSecondary;
-  final Color accent;
   final VoidCallback? onPrimary;
 
   const _ConfirmDialog({
@@ -354,28 +265,26 @@ class _ConfirmDialog extends StatelessWidget {
     required this.primaryText,
     required this.secondaryText,
     required this.showSecondary,
-    required this.accent,
     this.pillText,
     this.onPrimary,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
     return Dialog(
       insetPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-      backgroundColor: Colors.transparent,
+      backgroundColor: transparentColor,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
         child: Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
+            color: Colors.white,
             borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: accent.withOpacity(0.14)),
+            border: Border.all(color: electric.withOpacity(0.14)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.22),
+                color: pureBlack.withOpacity(0.22),
                 blurRadius: 30,
                 offset: const Offset(0, 18),
               ),
@@ -391,7 +300,7 @@ class _ConfirmDialog extends StatelessWidget {
                   height: 160,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accent.withOpacity(0.14),
+                    color: electric.withOpacity(0.14),
                   ),
                 ),
               ),
@@ -403,7 +312,7 @@ class _ConfirmDialog extends StatelessWidget {
                   height: 200,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: accent.withOpacity(0.08),
+                    color: electric.withOpacity(0.08),
                   ),
                 ),
               ),
@@ -420,10 +329,11 @@ class _ConfirmDialog extends StatelessWidget {
                           height: 46,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: accent.withOpacity(0.12),
-                            border: Border.all(color: accent.withOpacity(0.18)),
+                            color: electric.withOpacity(0.12),
+                            border:
+                                Border.all(color: electric.withOpacity(0.18)),
                           ),
-                          child: Icon(icon, color: accent, size: 22),
+                          child: Icon(icon, color: electric, size: 22),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -437,24 +347,22 @@ class _ConfirmDialog extends StatelessWidget {
                                       title,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
-                                      style:
-                                          theme.textTheme.titleMedium?.copyWith(
+                                      style: inconsolataStyle(
                                         fontWeight: FontWeight.w800,
+                                        color: electric,
                                       ),
                                     ),
                                   ),
                                   if (pillText != null &&
                                       pillText!.trim().isNotEmpty)
-                                    Pill(text: pillText!, color: accent),
+                                    Pill(text: pillText!),
                                 ],
                               ),
                               const SizedBox(height: 6),
                               Text(
                                 message,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  height: 1.35,
-                                  color: theme.colorScheme.onSurface
-                                      .withOpacity(0.78),
+                                style: inconsolataStyle(
+                                  color: electric.withOpacity(0.78),
                                 ),
                               ),
                             ],
@@ -477,7 +385,7 @@ class _ConfirmDialog extends StatelessWidget {
                         Expanded(
                           child: PrimaryButton(
                             text: primaryText,
-                            color: accent,
+                            color: electric,
                             onTap: () {
                               onPrimary?.call();
                               Get.back(result: true);
@@ -500,14 +408,12 @@ class _ConfirmDialog extends StatelessWidget {
 class _SheetShell extends StatelessWidget {
   final String title;
   final IconData icon;
-  final Color accent;
   final String? pillText;
   final Widget child;
 
   const _SheetShell({
     required this.title,
     required this.icon,
-    required this.accent,
     required this.child,
     this.pillText,
   });
@@ -515,16 +421,15 @@ class _SheetShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
-        border: Border.all(color: accent.withOpacity(0.14)),
+        border: Border.all(color: electric.withOpacity(0.14)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.20),
+            color: pureBlack.withOpacity(0.20),
             blurRadius: 26,
             offset: const Offset(0, -10),
           )
@@ -538,7 +443,7 @@ class _SheetShell extends StatelessWidget {
             height: 4,
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: theme.colorScheme.onSurface.withOpacity(0.12),
+              color: neutralGrey.withOpacity(0.12),
               borderRadius: BorderRadius.circular(999),
             ),
           ),
@@ -549,22 +454,23 @@ class _SheetShell extends StatelessWidget {
                 height: 42,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: accent.withOpacity(0.12),
-                  border: Border.all(color: accent.withOpacity(0.18)),
+                  color: electric.withOpacity(0.12),
+                  border: Border.all(color: electric.withOpacity(0.18)),
                 ),
-                child: Icon(icon, color: accent, size: 20),
+                child: Icon(icon, color: electric, size: 20),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   title,
-                  style: theme.textTheme.titleMedium?.copyWith(
+                  style: inconsolataStyle(
                     fontWeight: FontWeight.w900,
+                    color: electric
                   ),
                 ),
               ),
               if (pillText != null && pillText!.trim().isNotEmpty)
-                Pill(text: pillText!, color: accent),
+                Pill(text: pillText!),
             ],
           ),
           const SizedBox(height: 12),
@@ -577,9 +483,8 @@ class _SheetShell extends StatelessWidget {
 
 class Pill extends StatelessWidget {
   final String text;
-  final Color color;
 
-  const Pill({super.key, required this.text, required this.color});
+  const Pill({super.key, required this.text,});
 
   @override
   Widget build(BuildContext context) {
@@ -587,16 +492,15 @@ class Pill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: color.withOpacity(0.12),
-        border: Border.all(color: color.withOpacity(0.18)),
+        color: electric.withOpacity(0.12),
+        border: Border.all(color: electric.withOpacity(0.18)),
       ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: color.withOpacity(0.9),
-              letterSpacing: 0.2,
-            ),
+        style: inconsolataStyle(
+          fontWeight: FontWeight.w800,
+          color: electric.withOpacity(0.9),
+        ),
       ),
     );
   }
@@ -627,10 +531,9 @@ class PrimaryButton extends StatelessWidget {
           alignment: Alignment.center,
           child: Text(
             text,
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.black87,
-                  fontWeight: FontWeight.w900,
-                ),
+            style: inconsolataStyle(
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ),
@@ -646,9 +549,7 @@ class GhostButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Material(
-      color: theme.colorScheme.surface,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -659,14 +560,14 @@ class GhostButton extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: theme.colorScheme.onSurface.withOpacity(0.10),
+              color: electric,
             ),
           ),
           child: Text(
             text,
-            style: theme.textTheme.labelLarge?.copyWith(
+            style: inconsolataStyle(
               fontWeight: FontWeight.w800,
-              color: theme.colorScheme.onSurface.withOpacity(0.78),
+              color: electric.withOpacity(0.78),
             ),
           ),
         ),

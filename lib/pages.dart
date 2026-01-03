@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:path/path.dart' as p;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
@@ -51,6 +52,7 @@ part 'features/widgets/button.dart';
 part 'features/widgets/style_text.dart';
 
 part 'features/widgets/divider.dart';
+part 'features/widgets/geolocator.dart';
 
 part 'features/widgets/toggle.dart';
 

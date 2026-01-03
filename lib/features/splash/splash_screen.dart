@@ -5,7 +5,6 @@ class Splash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // controller dibuat sekali saat page dibuka
     Get.put(SplashController());
 
     return Scaffold(

@@ -15,7 +15,7 @@ class _DattingState extends State<Datting> {
     super.initState();
     controller = Get.isRegistered<DattingController>()
         ? Get.find<DattingController>()
-        : Get.put(DattingController(), permanent: true);
+        : Get.put(DattingController());
   }
 
   @override
@@ -71,7 +71,7 @@ class _DattingState extends State<Datting> {
                   }
 
                   return SwipeDeck<DatingUser>(
-                    key: ValueKey(data.map((e) => e.uid).join('|')),
+                    key: ValueKey(controller.users.length),
                     items: data,
                     visibleCount: 3,
                     onSwipeLeft: controller.onSwipeLeft,

@@ -5,7 +5,7 @@ class ChatListController extends GetxController {
   final isLoading = true.obs;
   final error = ''.obs;
 
-  StreamSubscription<List<ChatRoom>>? _sub;
+  StreamSubscription? _sub;
 
   @override
   void onInit() {
@@ -21,9 +21,7 @@ class ChatListController extends GetxController {
     _sub = ChatRepo.instance.streamMyRooms(me.uid).listen((list) {
       rooms.value = list;
       isLoading.value = false;
-      error.value = '';
-    }, onError: (e, st) {
-      debugPrint('[ChatListController] error: $e\n$st');
+    }, onError: (e) {
       error.value = e.toString();
       isLoading.value = false;
     });
